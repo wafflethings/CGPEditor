@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CgpEditor.LevelEditor;
+using SFB;
 using UnityEngine;
 
 namespace CgpEditor.IO
@@ -20,9 +21,49 @@ namespace CgpEditor.IO
             {CGPrefabType.Mass, 'H'},
         };
 
+        private static ExtensionFilter[] _validExtensions = { new ExtensionFilter("Cybergrind pattern ", "cgp", "cgpe") };
+        
+        public static string RootPath => Directory.GetParent(Application.dataPath).FullName;
+        private static string PatternPath => Path.Combine(RootPath, "Patterns");
+
         public static void SaveFile(string path)
         {
             File.WriteAllLines(path, SerializeGrid(CGGrid.CurrentCgGrid));
+        }
+
+        public static bool SaveDialog()
+        {
+            EnsurePatternFolder();
+            string path = StandaloneFileBrowser.SaveFilePanel("Save pattern", PatternPath, FileData.CurrentFile.FileName, FileData.CurrentFile.Extension);
+
+            if (path == string.Empty)
+            {
+                return false;
+            }
+
+            SaveFile(path);
+            return true;
+        }
+        public static bool LoadDialog()
+        {
+            EnsurePatternFolder();
+            string[] files = StandaloneFileBrowser.OpenFilePanel("Load pattern", PatternPath, _validExtensions, false);
+
+            if (files.Length == 0)
+            {
+                return false;
+            }
+            
+            LoadFile(files[0]);
+            return true;
+        }
+
+        private static void EnsurePatternFolder()
+        {
+            if (!Directory.Exists(PatternPath))
+            {
+                Directory.CreateDirectory(PatternPath);
+            }
         }
         
         public static void LoadFile(string path)
@@ -33,6 +74,7 @@ namespace CgpEditor.IO
             fileName = fileName.Substring(0, fileName.IndexOf(ext, StringComparison.Ordinal) - 1);
             FileData.CurrentFile = new FileData(fileName, ext);
             DeserializeGrid(File.ReadAllLines(path));
+            MainMenuRandomPattern.Add(path);
         }
         
         public static string[] SerializeGrid(CGGrid grid)

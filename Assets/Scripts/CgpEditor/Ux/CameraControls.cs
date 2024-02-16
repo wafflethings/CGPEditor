@@ -7,18 +7,31 @@ namespace CgpEditor.Ux
         public float Sensitivity = 3;
         public float ScrollSensitivity = 10;
         public float AddedCameraLerpSpeed = 5;
+        public float ZoomSpeedMultiplier = 0.5f;
         public float PanSpeed = 5;
+        public float DefaultZoom;
         public Camera Camera;
-        private float _targetCameraPosition;
+        [SerializeField] private float _targetCameraPosition;
+        private float _startZoomOut;
+        private bool _enabled;
 
         private void Start()
         {
-            _targetCameraPosition = (transform.localPosition).magnitude;
+            _targetCameraPosition = (Camera.transform.localPosition).magnitude;
+            _startZoomOut = _targetCameraPosition;
             Debug.Log($"{Camera.transform.position} - {transform.position} = {Camera.transform.position - transform.position}, magni {(Camera.transform.position - transform.position).magnitude}");
         }
         
         private void Update()
         {
+            Scroll();
+            
+            if (!_enabled)
+            {
+                transform.eulerAngles += new Vector3(0, Time.deltaTime * 10, 0);
+                return;
+            }
+            
             if (Input.GetMouseButton(1))
             {
                 Cursor.lockState = CursorLockMode.Locked;
@@ -28,8 +41,7 @@ namespace CgpEditor.Ux
             {
                 Cursor.lockState = CursorLockMode.None;
             }
-
-            Scroll();
+            
             Pan();
         }
 
@@ -41,10 +53,14 @@ namespace CgpEditor.Ux
 
         private void Scroll()
         {
-            _targetCameraPosition -= Input.GetAxis("Mouse ScrollWheel") * ScrollSensitivity;
-            _targetCameraPosition = Mathf.Clamp(_targetCameraPosition, 50, 250);
+            if (_enabled)
+            {
+                _targetCameraPosition -= Input.GetAxis("Mouse ScrollWheel") * ScrollSensitivity;
+                _targetCameraPosition = Mathf.Clamp(_targetCameraPosition, 50, 500);
+            }
+
             Camera.transform.localPosition = Vector3.MoveTowards(Camera.transform.localPosition, _targetCameraPosition * Vector3.up, 
-                Time.deltaTime * ((Camera.transform.localPosition - _targetCameraPosition * -Camera.transform.forward).sqrMagnitude + AddedCameraLerpSpeed));
+                Time.deltaTime * ZoomSpeedMultiplier * ((Camera.transform.localPosition - _targetCameraPosition * Vector3.up).magnitude + AddedCameraLerpSpeed));
         }
 
         private void Pan()
@@ -82,6 +98,18 @@ namespace CgpEditor.Ux
             }
 
             transform.position += Time.deltaTime * PanSpeed * direction;
+        }
+
+        public void Enable()
+        {
+            _targetCameraPosition = DefaultZoom;
+            _enabled = true;
+        }
+
+        public void Disable()
+        {
+            _targetCameraPosition = _startZoomOut;
+            _enabled = false;
         }
     }
 }

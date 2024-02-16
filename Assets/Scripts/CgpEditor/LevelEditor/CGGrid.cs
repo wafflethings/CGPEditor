@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CgpEditor.IO;
+using CgpEditor.LevelEditor.Selection;
 using UnityEngine;
 
 namespace CgpEditor.LevelEditor
@@ -22,7 +23,7 @@ namespace CgpEditor.LevelEditor
         {
             if (CurrentCgGrid != null)
             {
-                Selection.Instance.Objects.Clear();
+                SelectionManager.Instance?.Objects.Clear();
                 Destroy(CurrentCgGrid.gameObject);
             }
 
@@ -41,8 +42,6 @@ namespace CgpEditor.LevelEditor
             cgGrid.Build();
             return cgGrid;
         }
-
-
 
         private void Build()
         {

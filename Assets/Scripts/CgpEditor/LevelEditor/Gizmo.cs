@@ -1,23 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
+using CgpEditor.LevelEditor.Selection;
 using CgpEditor.Ux;
 using UnityEngine;
 
 namespace CgpEditor.LevelEditor
 {
-    public class Gizmo : MonoBehaviour, IClickable
+    public class Gizmo : MonoSingleton<Gizmo>, IClickable
     {
+        public bool Dragging;
         private int _previousY;
-        private bool _dragging = false;
+
+        private void Start()
+        {
+            Refresh();
+        }
 
         private void Update()
         {
             transform.localScale = Vector3.one * (Vector3.Distance(transform.position, CameraControls.Instance.Camera.transform.position) / 30);
             if (!Input.GetMouseButton(0))
             {
-                _dragging = false;
+                Dragging = false;
             }
 
-            if (_dragging)
+            if (Dragging)
             {
                 Debug.Log("Dragging");
                 Vector3 direction = CameraControls.Instance.transform.position - transform.position;
@@ -33,7 +40,7 @@ namespace CgpEditor.LevelEditor
                     int yDifference = currentY - _previousY;
                     _previousY = currentY;
                     
-                    foreach (EditorObject eo in Selection.Instance.Objects)
+                    foreach (EditorObject eo in SelectionManager.Instance.Objects)
                     {
                         if (!eo.TryGetComponent(out CGGridCube gc))
                         {
@@ -48,8 +55,36 @@ namespace CgpEditor.LevelEditor
 
         public void Clicked()
         {
-            _dragging = true;
+            Dragging = true;
             _previousY = (int)(transform.position.y / CGGridCube.OneCubeSize);
+        }
+        
+        public void Refresh()
+        {
+            List<EditorObject> objects = SelectionManager.Instance.Objects;
+            Vector3 sum = Vector3.zero;
+            float maxY = float.MinValue;
+                
+            foreach (EditorObject eo in objects)
+            {
+                if (maxY < eo.transform.position.y)
+                {
+                    maxY = eo.transform.position.y;
+                }
+                sum += eo.transform.position;
+            }
+
+            if (objects.Count != 0)
+            {
+                gameObject.SetActive(true);
+                Vector3 newPos = sum / objects.Count;
+                newPos.y = maxY + CGGridCube.YOffset;
+                gameObject.transform.position = newPos;
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
     }
 }

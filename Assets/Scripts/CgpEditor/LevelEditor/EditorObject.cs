@@ -1,15 +1,16 @@
-﻿using UnityEngine;
+﻿using CgpEditor.LevelEditor.Selection;
+using UnityEngine;
 
 namespace CgpEditor.LevelEditor
 {
-    public class EditorObject : MonoBehaviour, IClickable
+    public class EditorObject : MonoBehaviour
     {
         public Vector2Int GridPosition;
         public Material[] DefaultMaterials;
         public Material[] SelectedMaterials;
         public MeshRenderer Renderer;
         
-        public bool IsSelected => Selection.Instance.Objects.Contains(this);
+        public bool IsSelected => SelectionManager.Instance.Objects.Contains(this);
         
         public void Select()
         {
@@ -19,11 +20,6 @@ namespace CgpEditor.LevelEditor
         public void Deselect()
         {
             Renderer.materials = DefaultMaterials;
-        }
-
-        public void Clicked()
-        {
-            Selection.Instance.SelectObject(this, true);
         }
     }
 }

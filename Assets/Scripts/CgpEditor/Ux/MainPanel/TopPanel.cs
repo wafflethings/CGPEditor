@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CgpEditor.Ux
+namespace CgpEditor.Ux.MainPanel
 {
     public class TopPanel : MonoBehaviour
     {
@@ -11,7 +11,7 @@ namespace CgpEditor.Ux
         private RectTransform _rect;
         private List<Coroutine> _currentCoroutines = new List<Coroutine>();
         
-        private void Start()
+        private void Awake()
         {
             _rect = transform as RectTransform;
             _targetWidth = 1;

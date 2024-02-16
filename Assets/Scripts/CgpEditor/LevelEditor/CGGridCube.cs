@@ -2,11 +2,24 @@
 
 namespace CgpEditor.LevelEditor
 {
-    public class CGGridCube : MonoBehaviour, IClickable
+    public class CGGridCube : MonoBehaviour
     {
         public const int OneCubeSize = 5;
         public const int YOffset = 5 * OneCubeSize;
-        public EditorObject Object { get; private set; }
+
+        public EditorObject Object
+        {
+            get
+            {
+                if (!(bool)_object)
+                {
+                    _object = GetComponent<EditorObject>();
+                }
+
+                return _object;
+            }
+        }
+        private EditorObject _object;
 
         public int Height
         {
@@ -16,13 +29,7 @@ namespace CgpEditor.LevelEditor
 
         private void Start()
         {
-            Object = GetComponent<EditorObject>();
             RefreshPosition();
-        }
-        
-        public void Clicked()
-        {
-            
         }
         
         public void SetHeight(int targetY)
@@ -33,6 +40,13 @@ namespace CgpEditor.LevelEditor
 
         public void RefreshPosition()
         {
+            if (Object == null)
+            {
+                Debug.LogWarning($"Somehow CGGridCube {gameObject.name} has a null EditorObject; destroying??");
+                Destroy(gameObject);
+                return;
+            }
+            
             transform.position = new Vector3(transform.position.x, Height * OneCubeSize, transform.position.z);
         }
     }
