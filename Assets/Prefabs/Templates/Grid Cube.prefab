@@ -26,18 +26,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76fa595989924e4b99b9946a17bec65f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-345481862639556225
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3123287056496794251}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32808d7118d347fda3b4bfd9ba276e63, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   GridPosition: {x: 0, y: 0}
   DefaultMaterials:
   - {fileID: 2100000, guid: 1fcb8a3398fe93946b673fb65ee4b9c3, type: 2}
@@ -47,6 +35,10 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 64d6c8bc6107cee4382ceae7f532ffdf, type: 2}
   - {fileID: 2100000, guid: 64d6c8bc6107cee4382ceae7f532ffdf, type: 2}
   - {fileID: 2100000, guid: 64d6c8bc6107cee4382ceae7f532ffdf, type: 2}
+  PaintingMaterials:
+  - {fileID: 2100000, guid: 506615aaca40969498bd6cd2179ba0ae, type: 2}
+  - {fileID: 2100000, guid: 506615aaca40969498bd6cd2179ba0ae, type: 2}
+  - {fileID: 2100000, guid: 506615aaca40969498bd6cd2179ba0ae, type: 2}
   Renderer: {fileID: 3483773419458050910}
 --- !u!1001 &2853396322165991386
 PrefabInstance:

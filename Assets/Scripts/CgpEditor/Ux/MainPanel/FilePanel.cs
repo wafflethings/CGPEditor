@@ -13,7 +13,11 @@ namespace CgpEditor.Ux.MainPanel
 
         public void LoadDialog()
         {
+#if !UNITY_WEBGL
             MessageBox.Instance.Show("-- SAVE --", "Do you want to save before loading?", LoadIfSaved, "YES", "NO");
+#else
+            FileIO.LoadDialog();
+#endif
         }
 
         private void LoadIfSaved(MessageBoxButton btn)
@@ -25,7 +29,7 @@ namespace CgpEditor.Ux.MainPanel
                     return;
                 }
             }
-            
+
             FileIO.LoadDialog();
         }
     }

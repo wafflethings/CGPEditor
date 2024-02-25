@@ -16,12 +16,12 @@ namespace CgpEditor.Ux
 
         private void Start()
         {
-            SizeInput.onValueChanged.AddListener((value) =>
+            SizeInput.onValueChanged.AddListener(value =>
             {
                 SizeInput.text = new string(value.Where(char.IsDigit).ToArray());
             });
         }
-        
+
         public void TryLoadAndDisable()
         {
             if (FileIO.LoadDialog())
@@ -43,7 +43,7 @@ namespace CgpEditor.Ux
             CGGrid.CreateGrid(size);
             ToggleEditor();
         }
-        
+
         private void ToggleEditor()
         {
             gameObject.SetActive(false);
@@ -55,14 +55,14 @@ namespace CgpEditor.Ux
         {
             MessageBox.Instance.Show("-- SAVE --", "Do you want to save before leaving?", ExitIfSaved, "YES", "NO");
         }
-        
+
         public void EnableAgain()
         {
             gameObject.SetActive(true);
             Editor.SetActive(false);
             CameraControls.Instance.Disable();
         }
-        
+
         private void ExitIfSaved(MessageBoxButton btn)
         {
             if (btn == MessageBoxButton.Left)
@@ -72,8 +72,23 @@ namespace CgpEditor.Ux
                     return;
                 }
             }
-            
+
             EnableAgain();
+        }
+
+        public void OpenYoutube()
+        {
+            Application.OpenURL("https://www.youtube.com/@Waff1e_");
+        }
+
+        public void OpenTwitter()
+        {
+            Application.OpenURL("https://twitter.com/wafflestuff_");
+        }
+
+        public void Quit()
+        {
+            Application.Quit();
         }
     }
 }

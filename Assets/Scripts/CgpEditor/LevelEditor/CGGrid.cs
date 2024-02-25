@@ -8,7 +8,7 @@ namespace CgpEditor.LevelEditor
     public class CGGrid : MonoBehaviour
     {
         public static CGGrid CurrentCgGrid;
-        
+
         [Header("Templates")]
         public GameObject CubeTemplate;
         public GameObject StairTemplate;
@@ -18,7 +18,7 @@ namespace CgpEditor.LevelEditor
         public int[,] Heights;
         public CGPrefabType[,] Prefabs;
         public CGGridCube[,] Cubes;
-        
+
         public static CGGrid CreateGrid(int length)
         {
             if (CurrentCgGrid != null)
@@ -50,14 +50,20 @@ namespace CgpEditor.LevelEditor
             {
                 for (int z = 0; z < Length; z++)
                 {
-                    GameObject newCube = Instantiate(CubeTemplate, new Vector3(x, Heights[x, z], z) * CGGridCube.OneCubeSize, Quaternion.identity);
+                    GameObject newCube = Instantiate(CubeTemplate, new Vector3(x, 0, z) * CGGridCube.OneCubeSize, Quaternion.identity);
                     newCube.transform.parent = transform;
-                    newCube.GetComponent<EditorObject>().GridPosition = new Vector2Int(x, z);
                     Cubes[x, z] = newCube.GetComponent<CGGridCube>();
+                    Cubes[x, z].GridPosition = new Vector2Int(x, z);
                 }
             }
 
             transform.position -= CGGridCube.OneCubeSize * Length * new Vector3(0.5f, 0, 0.5f);
+        }
+
+        public void SetPrefab(CGPrefabType type, int x, int y)
+        {
+            Cubes[x, y].SetPrefabVisuals(type);
+            Prefabs[x, y] = type;
         }
     }
 }

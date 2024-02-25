@@ -14,9 +14,11 @@ namespace CgpEditor.Ux
         [SerializeField] private float _targetCameraPosition;
         private float _startZoomOut;
         private bool _enabled;
+        private Vector3 _realRotation;
 
         private void Start()
         {
+            _realRotation = transform.rotation.eulerAngles;
             _targetCameraPosition = (Camera.transform.localPosition).magnitude;
             _startZoomOut = _targetCameraPosition;
             Debug.Log($"{Camera.transform.position} - {transform.position} = {Camera.transform.position - transform.position}, magni {(Camera.transform.position - transform.position).magnitude}");
@@ -24,11 +26,13 @@ namespace CgpEditor.Ux
         
         private void Update()
         {
+            transform.eulerAngles = _realRotation;
+            
             Scroll();
             
             if (!_enabled)
             {
-                transform.eulerAngles += new Vector3(0, Time.deltaTime * 10, 0);
+                _realRotation += new Vector3(0, Time.deltaTime * 10, 0);
                 return;
             }
             
@@ -47,8 +51,7 @@ namespace CgpEditor.Ux
 
         private void MouseLook()
         {
-            transform.rotation *= Quaternion.Euler(Input.GetAxis("Mouse Y") * Sensitivity, -Input.GetAxis("Mouse X") * Sensitivity, 0);
-            transform.rotation = Quaternion.Euler(Utils.ClampAngle(transform.rotation.eulerAngles.x, 270, 360), transform.rotation.eulerAngles.y, 0);
+            _realRotation += new Vector3(Input.GetAxis("Mouse Y") * Sensitivity, -Input.GetAxis("Mouse X") * Sensitivity, 0);
         }
 
         private void Scroll()

@@ -1,0 +1,157 @@
+fileFormatVersion: 2
+guid: a47af666ef2f8774da5ae5d0e4fd1ecd
+ModelImporter:
+  serializedVersion: 19301
+  internalIDToNameTable:
+  - first:
+      74: 4781951162920444690
+    second: Armature|ArmatureAction
+  - first:
+      74: -5583133620424084709
+    second: Armature|BattlePose
+  - first:
+      74: 64979459352602221
+    second: Armature|BattlePose.001
+  - first:
+      74: -6363731304762933637
+    second: Armature|BattleSlam
+  - first:
+      74: 5104429296283113710
+    second: Armature|BattleSwing
+  - first:
+      74: -4449437395761308173
+    second: Armature|BattleToScout
+  - first:
+      74: -1763643140196483779
+    second: Armature|BattleWalk
+  - first:
+      74: -5273400136659264119
+    second: Armature|CrazyPose
+  - first:
+      74: 1251935874506710405
+    second: Armature|Intro
+  - first:
+      74: -6429207656368932827
+    second: Armature|ScoutAttack1
+  - first:
+      74: 7597218630185715876
+    second: Armature|ScoutDeath
+  - first:
+      74: -1804538183707961657
+    second: Armature|ScoutExplosiveFire
+  - first:
+      74: 5774120941669600856
+    second: Armature|ScoutFakeDeath
+  - first:
+      74: 8033259993849630383
+    second: Armature|ScoutPose
+  - first:
+      74: -929445005307048503
+    second: Armature|ScoutRapidFire
+  - first:
+      74: 3419157410992822477
+    second: Armature|ScoutSlam
+  - first:
+      74: -9154512823039908558
+    second: Armature|ScoutToBattle
+  - first:
+      74: -248676662676510085
+    second: Armature|ScoutWalk
+  - first:
+      74: 6015093715098290511
+    second: Armature|SpearParried
+  - first:
+      74: -5689112611396637883
+    second: Armature|SpearShoot
+  externalObjects: {}
+  materials:
+    materialImportMode: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

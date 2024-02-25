@@ -11,7 +11,9 @@ namespace CgpEditor.LevelEditor.Selection
         public LayerMask ObjectMask;
         public LayerMask GizmoMask;
         public SelectionType CurrentSelection;
-        public List<EditorObject> Objects = new List<EditorObject>();
+        public List<CGGridCube> Objects = new List<CGGridCube>();
+        public BrushMode CurrentBrushMode;
+        private List<CGGridCube> _currentlyPaintingObjects = new List<CGGridCube>();
         private Dictionary<Type, SelectionType> _selectionTypeFromType = new Dictionary<Type, SelectionType>();
 
         private void Start()
@@ -24,11 +26,19 @@ namespace CgpEditor.LevelEditor.Selection
         
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                UndoSelectMaterial();
+                Objects.Clear();
+                Gizmo.Instance.Refresh();
+            }
+            
             if (Input.GetMouseButtonDown(0))
             {
                 RaycastForObject();
             }
 
+            ClearPaintingObjects();
             if (CurrentSelection?.IsActive ?? false)
             {
                 CurrentSelection.SelectionUpdate();
@@ -54,38 +64,96 @@ namespace CgpEditor.LevelEditor.Selection
         
         public void UndoSelectMaterial()
         {
-            foreach (EditorObject eo in Objects)
+            foreach (CGGridCube gc in Objects)
             {
-                eo.Deselect();
+                gc.Deselect();
             }
         }
 
         public void DoSelectMaterial()
         {
-            foreach (EditorObject eo in Objects)
+            foreach (CGGridCube gc in Objects)
             {
-                eo.Select();
+                gc.Select();
             }
         }
 
-        public void SelectObject(EditorObject eo)
+        public void SelectObject(CGGridCube gc)
         {
-            if (Objects.Contains(eo))
+            if (Objects.Contains(gc))
             {
                 return;
             }
             
-            Objects.Add(eo);
+            Objects.Add(gc);
             Gizmo.Instance.Refresh();
+        }
+        
+        public void DeselectObject(CGGridCube gc)
+        {
+            if (!Objects.Contains(gc))
+            {
+                return;
+            }
+            
+            Objects.Remove(gc);
+            Gizmo.Instance.Refresh();
+        }
+
+        public void UseObjectToPaint(CGGridCube gc)
+        {
+            if (_currentlyPaintingObjects.Contains(gc))
+            {
+                return;
+            }
+            
+            gc.Painting();
+            _currentlyPaintingObjects.Add(gc);
+        }
+
+        public void SelectOrPaint(SelectionShapeMode mode, CGGridCube CGGridCube)
+        {
+            if (mode == SelectionShapeMode.Select)
+            {
+                if (CurrentBrushMode == BrushMode.Select)
+                {
+                    SelectObject(CGGridCube);
+                }
+                else if (CurrentBrushMode == BrushMode.Deselect)
+                {
+                    DeselectObject(CGGridCube);
+                }
+            } 
+            else if (mode == SelectionShapeMode.Paint)
+            {
+                UseObjectToPaint(CGGridCube);
+            }
+        }
+
+        public void ClearPaintingObjects()
+        {
+            foreach (CGGridCube gc in _currentlyPaintingObjects)
+            {
+                gc.StopPainting();
+            }
+            _currentlyPaintingObjects.Clear();
         }
 
         public void ClearIfNotShift()
         {
-            if (!Input.GetKey(KeyCode.LeftShift))
+            if (!Input.GetKey(KeyCode.LeftShift) && CurrentBrushMode == BrushMode.Select)
             {
                 Objects.Clear();
             }
             Gizmo.Instance.Refresh();
+        }
+
+        public void FillSelectionWithPrefab(CGPrefabType type)
+        {
+            foreach (CGGridCube CGGridCube in Objects)
+            {
+                CGGrid.CurrentCgGrid.SetPrefab(type, CGGridCube.GridPosition.x, CGGridCube.GridPosition.y);
+            }
         }
     }
 }

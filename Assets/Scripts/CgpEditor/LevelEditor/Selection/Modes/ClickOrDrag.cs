@@ -8,7 +8,7 @@ namespace CgpEditor.LevelEditor.Selection.Modes
     {
         public override void SelectionUpdate()
         {
-            if (!OnUi && (Input.GetMouseButtonUp(0) || (Input.GetMouseButton(0) && Input.GetKey(KeyCode.LeftShift))))
+            if ((Input.GetMouseButtonUp(0) || (Input.GetMouseButton(0) && Input.GetKey(KeyCode.LeftShift))) && !OnUi)
             {
                 SelectionManager.Instance.UndoSelectMaterial();
                 SelectionManager.Instance.ClearIfNotShift();
@@ -21,9 +21,9 @@ namespace CgpEditor.LevelEditor.Selection.Modes
         {
             if (Physics.Raycast(CameraControls.Instance.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 1000, SelectionManager.Instance.ObjectMask))
             {
-                if (hit.collider.gameObject.TryGetComponent(out EditorObject eo))
+                if (hit.collider.gameObject.TryGetComponent(out CGGridCube gc))
                 {
-                    SelectionManager.Instance.SelectObject(eo);
+                    SelectionManager.Instance.SelectOrPaint(SelectionShapeMode.Select, gc);
                 }
             }
         }

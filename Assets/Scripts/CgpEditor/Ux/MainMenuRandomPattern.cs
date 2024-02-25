@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CgpEditor.IO;
 using CgpEditor.LevelEditor;
 using UnityEngine;
 
-namespace CgpEditor.IO
+namespace CgpEditor.Ux
 {
     public class MainMenuRandomPattern : MonoBehaviour
     {
@@ -19,7 +20,7 @@ namespace CgpEditor.IO
             {
                 return;
             }
-            
+
             s_patterns.Add(path);
 
             while (s_patterns.Count > 10)
@@ -36,7 +37,7 @@ namespace CgpEditor.IO
             {
                 return string.Empty;
             }
-            
+
             return s_patterns[UnityEngine.Random.Range(0, s_patterns.Count)];
         }
 
@@ -44,14 +45,16 @@ namespace CgpEditor.IO
         {
             Load();
             string patternPath = Get();
-            
+
             if (patternPath == string.Empty)
             {
                 CGGrid.CreateGrid(16);
             }
             else
             {
+#if !UNITY_WEBGL
                 FileIO.LoadFile(patternPath);
+#endif
             }
         }
 
@@ -62,13 +65,17 @@ namespace CgpEditor.IO
 
         private void Save()
         {
+#if !UNITY_WEBGL
             File.WriteAllLines(FilePath, s_patterns);
+#endif
         }
 
         private void Load()
         {
+            #if !UNITY_WEBGL
             s_patterns.Clear();
             s_patterns.AddRange(File.ReadAllLines(FilePath));
+            #endif
         }
     }
 }

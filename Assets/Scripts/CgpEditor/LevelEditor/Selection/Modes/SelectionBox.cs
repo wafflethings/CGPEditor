@@ -67,7 +67,7 @@ namespace CgpEditor.LevelEditor.Selection.Modes
                 if (rect.Contains(fixedCubePos) && Physics.Raycast(CameraControls.Instance.transform.position, 
                         cube.transform.position - CameraControls.Instance.transform.position, SelectionManager.Instance.ObjectMask))
                 {
-                    SelectionManager.Instance.SelectObject(cube.Object);
+                    SelectionManager.Instance.SelectObject(cube);
                 }
             }
             

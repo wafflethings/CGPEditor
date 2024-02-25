@@ -8,11 +8,15 @@ namespace CgpEditor.LevelEditor
 {
     public class Gizmo : MonoSingleton<Gizmo>, IClickable
     {
+        public Material NormalMaterial;
+        public Material ClickedMaterial;
         public bool Dragging;
-        private int _previousY;
+        private float _previousY;
+        private MeshRenderer _renderer;
 
         private void Start()
         {
+            _renderer = GetComponentInChildren<MeshRenderer>();
             Refresh();
         }
 
@@ -21,6 +25,7 @@ namespace CgpEditor.LevelEditor
             transform.localScale = Vector3.one * (Vector3.Distance(transform.position, CameraControls.Instance.Camera.transform.position) / 30);
             if (!Input.GetMouseButton(0))
             {
+                _renderer.material = NormalMaterial;
                 Dragging = false;
             }
 
@@ -30,23 +35,20 @@ namespace CgpEditor.LevelEditor
                 Vector3 direction = CameraControls.Instance.transform.position - transform.position;
                 direction.y = 0;
                 Plane gizmoPlane = new Plane(direction.normalized, direction.magnitude);
-                
+
                 Ray ray = CameraControls.Instance.Camera.ScreenPointToRay(Input.mousePosition);
                 if (gizmoPlane.Raycast(ray, out float enterPoint))
                 {
-                    Vector3 hitPoint = ray.GetPoint(enterPoint);
-                    int currentY = (int)(hitPoint.y / CGGridCube.OneCubeSize);
-                    transform.position = new Vector3(transform.position.x, currentY * CGGridCube.OneCubeSize, transform.position.z);
-                    int yDifference = currentY - _previousY;
+                    float height = (int)(ray.GetPoint(enterPoint).y / CGGridCube.OneCubeHeight) * CGGridCube.OneCubeHeight; // snap to nearest OneCubeHeight// snap to nearest OneCubeHeight
+                    height = Mathf.Clamp(height, -CGGridCube.ClampLimit * CGGridCube.HeightToWidthMultiplier, CGGridCube.ClampLimit * CGGridCube.HeightToWidthMultiplier);
+                    float currentY = height / 5;// convert world space to grid
+                    float heightsDifference = currentY - _previousY; // this is still as a height (2.5 based) not on grid
+                    int yDifference = (int)(CGGridCube.HeightToWidthMultiplier * heightsDifference); // convert height to grid coord
+                    transform.position += new Vector3(0, yDifference * CGGridCube.OneCubeHeight, 0);
                     _previousY = currentY;
-                    
-                    foreach (EditorObject eo in SelectionManager.Instance.Objects)
+
+                    foreach (CGGridCube gc in SelectionManager.Instance.Objects)
                     {
-                        if (!eo.TryGetComponent(out CGGridCube gc))
-                        {
-                            return;
-                        }
-                        
                         gc.SetHeight(gc.Height + yDifference);
                     }
                 }
@@ -56,28 +58,29 @@ namespace CgpEditor.LevelEditor
         public void Clicked()
         {
             Dragging = true;
+            _renderer.material = ClickedMaterial;
             _previousY = (int)(transform.position.y / CGGridCube.OneCubeSize);
         }
-        
+
         public void Refresh()
         {
-            List<EditorObject> objects = SelectionManager.Instance.Objects;
+            List<CGGridCube> cubes = SelectionManager.Instance.Objects;
             Vector3 sum = Vector3.zero;
             float maxY = float.MinValue;
-                
-            foreach (EditorObject eo in objects)
+
+            foreach (CGGridCube cube in cubes)
             {
-                if (maxY < eo.transform.position.y)
+                if (maxY < cube.transform.position.y)
                 {
-                    maxY = eo.transform.position.y;
+                    maxY = cube.transform.position.y;
                 }
-                sum += eo.transform.position;
+                sum += cube.transform.position;
             }
 
-            if (objects.Count != 0)
+            if (cubes.Count != 0)
             {
                 gameObject.SetActive(true);
-                Vector3 newPos = sum / objects.Count;
+                Vector3 newPos = sum / cubes.Count;
                 newPos.y = maxY + CGGridCube.YOffset;
                 gameObject.transform.position = newPos;
             }

@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using CgpEditor.LevelEditor;
+using CgpEditor.Ux;
 using SFB;
 using UnityEngine;
 
@@ -11,7 +15,7 @@ namespace CgpEditor.IO
 {
     public static class FileIO
     {
-        public static readonly Dictionary<CGPrefabType, char> PrefabChars = new Dictionary<CGPrefabType, char>()
+        public static readonly Dictionary<CGPrefabType, char> PrefabToChar = new Dictionary<CGPrefabType, char>()
         {
             {CGPrefabType.None, '0'},
             {CGPrefabType.Melee, 'n'},
@@ -21,51 +25,35 @@ namespace CgpEditor.IO
             {CGPrefabType.Mass, 'H'},
         };
 
+        public static readonly Dictionary<char, CGPrefabType> CharToPrefab = new Dictionary<char, CGPrefabType>()
+        {
+            {'0', CGPrefabType.None},
+            {'n', CGPrefabType.Melee},
+            {'p', CGPrefabType.Projectile},
+            {'J', CGPrefabType.JumpPad},
+            {'s', CGPrefabType.Stairs},
+            {'H', CGPrefabType.Mass},
+        };
+
         private static ExtensionFilter[] _validExtensions = { new ExtensionFilter("Cybergrind pattern ", "cgp", "cgpe") };
-        
+
         public static string RootPath => Directory.GetParent(Application.dataPath).FullName;
         private static string PatternPath => Path.Combine(RootPath, "Patterns");
 
+#if UNITY_WEBGL
+        [DllImport("__Internal")]
+        private static extern void UploadFile(string gameObjectName, string methodName, string filter, bool multiple);
+
+        [DllImport("__Internal")]
+        private static extern void DownloadFile(string gameObjectName, string methodName, string filename, byte[] byteArray, int byteArraySize);
+#endif
+
+#if !UNITY_WEBGL
         public static void SaveFile(string path)
         {
             File.WriteAllLines(path, SerializeGrid(CGGrid.CurrentCgGrid));
         }
 
-        public static bool SaveDialog()
-        {
-            EnsurePatternFolder();
-            string path = StandaloneFileBrowser.SaveFilePanel("Save pattern", PatternPath, FileData.CurrentFile.FileName, FileData.CurrentFile.Extension);
-
-            if (path == string.Empty)
-            {
-                return false;
-            }
-
-            SaveFile(path);
-            return true;
-        }
-        public static bool LoadDialog()
-        {
-            EnsurePatternFolder();
-            string[] files = StandaloneFileBrowser.OpenFilePanel("Load pattern", PatternPath, _validExtensions, false);
-
-            if (files.Length == 0)
-            {
-                return false;
-            }
-            
-            LoadFile(files[0]);
-            return true;
-        }
-
-        private static void EnsurePatternFolder()
-        {
-            if (!Directory.Exists(PatternPath))
-            {
-                Directory.CreateDirectory(PatternPath);
-            }
-        }
-        
         public static void LoadFile(string path)
         {
             Debug.Log("Loading from " + path);
@@ -76,7 +64,73 @@ namespace CgpEditor.IO
             DeserializeGrid(File.ReadAllLines(path));
             MainMenuRandomPattern.Add(path);
         }
-        
+#else
+        public static void SaveFileWeb()
+        {
+            string fileName = $"{FileData.CurrentFile.FileName}.{FileData.CurrentFile.Extension}";
+            byte[] array = Encoding.UTF8.GetBytes(string.Join("\n", SerializeGrid(CGGrid.CurrentCgGrid)));
+            DownloadFile(WebGlFileReceiver.Instance.gameObject.name, nameof(WebGlFileReceiver.OnFileDownload), fileName, array, array.Length);
+        }
+
+        public static IEnumerator LoadFileWeb(string path)
+        {
+            Debug.Log("Loading from " + path);
+            WWW loader = new WWW(path);
+            yield return loader;
+            string[] file = loader.text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            string ext = file.Length != ((16 * 2) + 1) ? "cgpe" : "cgp";
+            FileData.CurrentFile = new FileData("pattern", ext);
+            Debug.Log("Loaded " + loader.text);
+            DeserializeGrid(file);
+        }
+#endif
+
+        public static bool SaveDialog()
+        {
+#if !UNITY_WEBGL
+            EnsurePatternFolder();
+            string path = StandaloneFileBrowser.SaveFilePanel("Save pattern", PatternPath, FileData.CurrentFile.FileName, FileData.CurrentFile.Extension);
+
+            if (path == string.Empty)
+            {
+                return false;
+            }
+
+            SaveFile(path);
+            return true;
+#else
+            SaveFileWeb();
+            return true;
+#endif
+        }
+
+        public static bool LoadDialog()
+        {
+#if !UNITY_WEBGL
+            EnsurePatternFolder();
+            string[] files = StandaloneFileBrowser.OpenFilePanel("Load pattern", PatternPath, _validExtensions, false);
+
+            if (files.Length == 0)
+            {
+                return false;
+            }
+
+            LoadFile(files[0]);
+            return true;
+#else
+            UploadFile(WebGlFileReceiver.Instance.gameObject.name, nameof(WebGlFileReceiver.OnFileUpload), "", false);
+            return true;
+#endif
+        }
+
+        private static void EnsurePatternFolder()
+        {
+            if (!Directory.Exists(PatternPath))
+            {
+                Directory.CreateDirectory(PatternPath);
+            }
+        }
+
         public static string[] SerializeGrid(CGGrid grid)
         {
             List<string> result = new List<string>();
@@ -85,7 +139,7 @@ namespace CgpEditor.IO
             result.AddRange(SerializePrefabs(grid.Prefabs));
             return result.ToArray();
         }
-        
+
         private static void DeserializeGrid(string[] lines)
         {
             List<string> environment = new List<string>();
@@ -102,20 +156,23 @@ namespace CgpEditor.IO
 
                 targetList.Add(line);
             }
-            
-            int[,] heights = ParseStringArrayHeights(environment.ToArray());
+
+            int[,] heights = DeserializeHeights(environment);
+            CGPrefabType[,] prefabs = DeserializePrefabs(enemies);
             CGGrid cgGrid = CGGrid.CreateGrid(heights.GetLength(0));
             cgGrid.Heights = heights;
+            cgGrid.Prefabs = prefabs;
 
             foreach (CGGridCube gc in cgGrid.Cubes)
             {
                 gc.RefreshPosition();
+                gc.RefreshPrefab();
             }
         }
-        
-        public static int[,] ParseStringArrayHeights(string[] pattern)
+
+        public static int[,] DeserializeHeights(List<string> pattern)
         {
-            int[,] result = new int[pattern.Length, pattern.Length];
+            int[,] result = new int[pattern.Count, pattern.Count];
 
             int y = 0;
             foreach (string row in pattern)
@@ -134,7 +191,7 @@ namespace CgpEditor.IO
 
                 bool insideBracket = false;
                 string newRow = string.Empty;
-                
+
                 foreach (char character in row)
                 {
                     //dont need to check if its opening or closing since CorrectlyClosedBrackets does that
@@ -161,15 +218,13 @@ namespace CgpEditor.IO
                 newRow = newRow.Replace("(", "|").Replace(")", "|");
                 newRow = newRow.Substring(0, newRow.Length - 1); //remove last |
 
-                Debug.Log("Final newRow: " + newRow);
-
                 int x = 0;
                 foreach (int number in newRow.Split('|').Select(str => int.Parse(str)))
                 {
                     result[x, y] = number;
                     x++;
                 }
-                
+
                 y++;
             }
 
@@ -178,21 +233,39 @@ namespace CgpEditor.IO
                 Debug.LogError("Pattern is not square.");
                 return null;
             }
-            
+
+            return result;
+        }
+
+        public static CGPrefabType[,] DeserializePrefabs(List<string> lines)
+        {
+            CGPrefabType[,] result = new CGPrefabType[lines.Count, lines.Count];
+
+            for (int i = 0; i < lines.Count; i++)
+            {
+                string line = lines[i];
+
+                for (int j = 0; j < line.Length; j++)
+                {
+                    char character = line[j];
+                    result[i, j] = CharToPrefab[character];
+                }
+            }
+
             return result;
         }
 
         public static string[] SerializePrefabs(CGPrefabType[,] prefabs)
         {
             string[] result = new string[prefabs.GetLength(1)];
-            
+
             for (int x = 0; x < prefabs.GetLength(0); x++)
             {
                 string row = string.Empty;
-                
+
                 for (int y = 0; y < prefabs.GetLength(1); y++)
                 {
-                    row += PrefabChars[prefabs[x, y]];
+                    row += PrefabToChar[prefabs[x, y]];
                 }
 
                 result[x] = row;
@@ -204,11 +277,11 @@ namespace CgpEditor.IO
         public static string[] SerializeHeights(int[,] heights)
         {
             string[] result = new string[heights.GetLength(1)];
-            
+
             for (int x = 0; x < heights.GetLength(0); x++)
             {
                 string row = string.Empty;
-                
+
                 for (int y = 0; y < heights.GetLength(1); y++)
                 {
                     string number = heights[x, y].ToString();
