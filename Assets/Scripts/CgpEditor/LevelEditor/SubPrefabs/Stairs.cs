@@ -4,6 +4,9 @@ namespace CgpEditor.LevelEditor
 {
     public class Stairs : SubPrefab
     {
+        public bool HasDirection;
+        public bool PrimaryErrors;
+        public bool SecondaryErrors;
         public GameObject PrimaryStairs;
         public GameObject SecondaryStairs;
         public Material NormalMaterial;
@@ -23,38 +26,39 @@ namespace CgpEditor.LevelEditor
 
             int differencePrimary;
             int differenceSecondary;
-            bool hasDirection = false;
 
             if (CheckIfStairsShouldReach(new Vector2Int(0, 1), out differencePrimary))
             {
                 PrimaryStairs.SetActive(true);
                 PrimaryStairs.transform.forward = transform.forward;
-                hasDirection = true;
+                HasDirection = true;
             }
             else if (CheckIfStairsShouldReach(new Vector2Int(0, -1), out differencePrimary))
             {
                 PrimaryStairs.SetActive(true);
                 PrimaryStairs.transform.forward = -transform.forward;
-                hasDirection = true;
+                HasDirection = true;
             }
 
             if (CheckIfStairsShouldReach(new Vector2Int(1, 0), out differenceSecondary))
             {
                 SecondaryStairs.SetActive(true);
                 SecondaryStairs.transform.forward = transform.right;
-                hasDirection = true;
+                HasDirection = true;
             }
             else if (CheckIfStairsShouldReach(new Vector2Int(-1, 0), out differenceSecondary))
             {
                 SecondaryStairs.SetActive(true);
                 SecondaryStairs.transform.forward = -transform.right;
-                hasDirection = true;
+                HasDirection = true;
             }
 
-            _primaryRenderer.material = differencePrimary > 2 || differencePrimary < 1f ? ErroringMaterial : NormalMaterial;
-            _secondaryRenderer.material = differenceSecondary > 2 || differenceSecondary < 1f ? ErroringMaterial : NormalMaterial;
+            PrimaryErrors = differencePrimary > 2 || differencePrimary < 1f;
+            SecondaryErrors = differenceSecondary > 2 || differenceSecondary < 1f;
+            _primaryRenderer.material = PrimaryErrors ? ErroringMaterial : NormalMaterial;
+            _secondaryRenderer.material = SecondaryErrors ? ErroringMaterial : NormalMaterial;
 
-            if (!hasDirection)
+            if (!HasDirection)
             {
                 PrimaryStairs.SetActive(true);
                 _primaryRenderer.material = ErroringMaterial;
@@ -78,6 +82,16 @@ namespace CgpEditor.LevelEditor
             if (Mathf.Approximately(2, differenceSecondary))
             {
                 SecondaryStairs.transform.localScale = new Vector3(1, 2, 1);
+            }
+
+            if (PrimaryErrors && !SecondaryErrors)
+            {
+                PrimaryStairs.SetActive(false);
+            }
+
+            if (!PrimaryErrors && SecondaryErrors)
+            {
+                SecondaryStairs.SetActive(false);
             }
         }
 

@@ -18,6 +18,8 @@ namespace CgpEditor.LevelEditor
         public int[,] Heights;
         public CGPrefabType[,] Prefabs;
         public CGGridCube[,] Cubes;
+        [Space]
+        public Renderer KillGrid;
 
         public static CGGrid CreateGrid(int length)
         {
@@ -40,6 +42,10 @@ namespace CgpEditor.LevelEditor
             }
             cgGrid.Length = length;
             cgGrid.Build();
+            cgGrid.KillGrid.material.mainTextureScale = Vector2.one * length;
+            cgGrid.KillGrid.transform.localScale = new Vector3(length / 2f, 1, length / 2f);
+            cgGrid.KillGrid.transform.position = new Vector3(-CGGridCube.OneCubeSize / 2, (-4 * CGGridCube.OneCubeHeight) + CGGridCube.YOffset, -CGGridCube.OneCubeSize / 2);
+            cgGrid.KillGrid.transform.position += new Vector3(0, 0.001f, 0); //prevent z fighting yippee
             return cgGrid;
         }
 
