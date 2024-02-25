@@ -248,7 +248,7 @@ namespace CgpEditor.IO
                 for (int j = 0; j < line.Length; j++)
                 {
                     char character = line[j];
-                    result[i, j] = CharToPrefab[character];
+                    result[j, i] = CharToPrefab[character];
                 }
             }
 

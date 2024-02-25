@@ -15115,7 +15115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 322e0bd13195423aa57e079a5673c4d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Sensitivity: 3
+  Sensitivity: -3
   ScrollSensitivity: 50
   AddedCameraLerpSpeed: 1
   ZoomSpeedMultiplier: 5
